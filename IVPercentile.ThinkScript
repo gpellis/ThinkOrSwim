@@ -1,0 +1,32 @@
+# IV Percentile Label for charts
+
+#HINT:use 252 as input length for 1-year or 52-week IV percentile
+#HINT:use 189 for 9-month IV percentile
+#HINT:use 126 for 6-month IV percentile
+
+declare upper;
+
+input aggregationLength = 252;
+#hint aggregationLength: number of bars to use in determining the implied volatility percentile.
+input greenCutoff = 55;
+#hint greenCutoff: percentile numbers above (inclusive) this number are colored green.
+input redCutoff = 45;
+#hint redCutoff: percentile numbers below (exclusive) this number are colored red.
+
+rec IVHist = impVolatility();
+
+def countAbove = (fold i = 1 to AggregationLength with ca do ca + 
+if IsNaN(getValue(IVHist, i, AggregationLength)) then 0 
+else if IsNaN(getValue(IVHist, 0, AggregationLength)) then 0 
+else if (getValue(IVHist, i, AggregationLength) > getValue(IVHist, 0, AggregationLength)) then 1 
+else 0);
+
+def countBellow = (fold j = 1 to AggregationLength with cd do cd + if IsNaN(getValue(IVHist, j, AggregationLength)) then 0 
+else if IsNaN(getValue(IVHist, 0, AggregationLength)) then 0 
+else if (getValue(IVHist, j, AggregationLength) < getValue(IVHist, 0, AggregationLength)) then 1 
+else 0);
+
+def IVPercentile = Round((countBellow / (countAbove + countBellow)) * 100, 0);
+
+Addlabel(yes, Concat("IV Percentile: ", IVPercentile), if ivPercentile >= greenCutoff then Color.GREEN else if ivPercentile < redCutoff then Color.RED else Color.YELLOW);
+
