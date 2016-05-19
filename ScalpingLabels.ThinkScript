@@ -1,0 +1,21 @@
+# Scalping Label
+
+# For making sure your scalping targets aren't too unrealistic. 
+
+# Installation:
+# open TOS charts Edit Study box and click on lower left word New...
+# delete all code in the box and replace it with this code
+# IMPORTANT: BE SURE to give your new study a name BEFORE you save it (can change the code later, but cannot change the name)
+
+
+declare upper;
+input period = AggregationPeriod.DAY ;
+#hint period: time period to use for aggregating implied volatility.
+
+
+def stopdeltaticks = Round( (open * imp_volatility(period = period) * 0.052342392259048) / TickSize(), 0);
+def targetdeltaticks = Round(stopdeltaticks * 0.25, 0);
+
+AddLabel(1, Concat(Concat("Scalp Target: ", targetdeltaticks), " ticks"), Color.GREEN);
+AddLabel(1, Concat(Concat("Scalp Stop: ", stopdeltaticks), " ticks"), Color.RED);
+# end code
